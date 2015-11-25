@@ -21,7 +21,7 @@ More info: http://libraryofwords.info/faq.html
   ```
   $ base.py -t 'Hello World!'
   ```
-  Output text in page at location "abcde123" and fills the rest of the page with other random words from the vocabulary
+  Output text in page at location "abcde123" and fills the rest of the page with other random words from the vocabulary:
   ```
   $ base.py -p 'abcde123' 
   ```
