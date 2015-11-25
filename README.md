@@ -1,8 +1,8 @@
 # library-of-words
 
 ## Synopsis
-Base engine for the website: http://libraryofwords.info
-More info: http://libraryofwords.info/faq.html
+Base engine for the website: http://libraryofwords.info  
+More info: http://libraryofwords.info/faq.html  
 
 ## Usage:
 ```
