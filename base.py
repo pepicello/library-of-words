@@ -116,23 +116,18 @@ def numToWords(num,join=True):
     return words
 
 # Creates random page for the searched string
-def genfullpage(pagenumber, words=vocabwords):
-    textofpage = base_encode(pagenumber)
-    fullpage = textofpage.split()[:wordsinpage]
+def genfullpage(textofpage, words=vocabwords):
+    fullpage = textofpage.split()
     wordsinstring = len(textofpage.split())
-    location = base_encode(pagenumber,base62)
-    start=0
-    end=wordsinpage
-    if wordsinstring < wordsinpage:
-        start=random.randrange(0,wordsinpage-wordsinstring)
-        end=wordsinstring+start
-        for i in range(0,start): 
-            fullpage.insert(0,words[random.randrange(0,nofwords-1)])
-        for i in range(end,wordsinpage):
-            fullpage.append(words[random.randrange(0,nofwords-1)])
-        location = base_encode(base_decode(' '.join(fullpage))[1],base62)
+    start=random.randrange(0,wordsinpage-wordsinstring)
+    end=wordsinstring+start
+    for i in range(0,start): 
+        fullpage.insert(0,words[random.randrange(0,nofwords-1)])
+    for i in range(end,wordsinpage):
+        fullpage.append(words[random.randrange(0,nofwords-1)])
+    location = base_encode(base_decode(' '.join(fullpage))[1],base62)
     return start, end, fullpage, location
-    
+
 ## Deprecated
 ## forward LCG
 ## https://en.wikipedia.org/wiki/Linear_congruential_generator
@@ -175,8 +170,8 @@ def genfullpage(pagenumber, words=vocabwords):
 if args.looktext:
     text = args.looktext
     text,page = base_decode(''.join(text))
-    if not args.stringonly:
-        s,s,text,location = genfullpage(page)
+    if not args.stringonly and len(text.split()) < 320:
+        s,s,text,location = genfullpage(text)
         print('"',' '.join(text),'"',sep='')
         print(location.replace(' ',''))
     else:
@@ -184,13 +179,15 @@ if args.looktext:
         print(base_encode(page,base62).replace(' ',''))
 
 # Location string -> Text
-if args.lookpage:
+if args.lookpage:    
     location,page = base_decode(args.lookpage,base62,False)
-    if not args.stringonly:
-        s,s,text,location = genfullpage(page)
+    text = base_encode(page)
+    if not args.stringonly and len(text.split()) < 320:
+        s,s,text,location = genfullpage(text)
         print('"',' '.join(text),'"',sep='')
         print(location.replace(' ',''))
     else:
         print('"',base_encode(page),'"',sep='')
         print(location.replace(' ',''))
+
 
