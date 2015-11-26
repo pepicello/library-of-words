@@ -3,9 +3,6 @@
 Search engine for Library of Words.
 
 Type base.py -h from terminal for usage.
-
-TODO: clean code
-      optimize (use dictionary?)
 """
 
 import random
@@ -14,7 +11,6 @@ import argparse
 
 __author__ = 'Giulio Pepe'
 __email__ = 'wordlibrarian@gmail.com'
-__date__ = "Nov 25, 2015"
 
 parser = argparse.ArgumentParser(description='Base engine for libraryofwords.info. Usage:')
 parser.add_argument('-t', '--looktext', type=str, help='Look for text in the library and return location')
@@ -23,65 +19,87 @@ parser.add_argument('-s', '--stringonly', action='store_true', help='String only
 args = parser.parse_args()
  
 # Open vocabulary
-vocabwords = []
+vocabwords = {}
 base62 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 nofwords = 0
 wordsinpage = 320
 with open("vocab.txt") as word_file:
-    for line in word_file:
-        vocabwords.append(line.rstrip('\r\n'))        
+    for key,value in enumerate(word_file):
+        vocabwords[value.rstrip('\r\n')] = key
         nofwords += 1
-        
+inversevocab = {v: k for k, v in vocabwords.items()}
+
 # Generalized-base encoder -> gives words from page number
 # Also used for base62 encoding
-def base_encode(page, words=vocabwords):
+def base_encode(page):
     if (page == 0):
-        return words[0]
+        return 'a'
     arr = []
-    base = len(words)
     while page:
-        rem = page % base
-        page = page // base
-        arr.append(words[rem])
+        rem = page % wordsinpage
+        page = page // wordsinpage
+        arr.append(inversevocab[rem])
     arr.reverse()
     return ' '.join(arr)
 
 # Generalized-base decoder -> gives page number from text (if word not in vocab, ignore)
 # Also used for base62 decoding
-def base_decode(text, words=vocabwords, vocabulary=True):
-    if vocabulary: # check if words in vocabulary 
-        newtext = []
-        text = re.sub(r'\W+', ' ', text) # remove unknown chars
-        splittext = text.split()
-        c = 0
-        while c < wordsinpage: # with limit to 320 words
-            try:
-                currentword = splittext[c]
-                if currentword.isdigit():
-                    numberword = numToWords(int(currentword))
-                    for i in numberword.split():
-                        newtext.append(i)
-                        c += 1
-                elif currentword in words:
-                    newtext.append(text.split()[c])
-                c += 1
-            except IndexError:
-                break
-        text = newtext
-    base = len(words)
-    strlen = len(text)
+def base_decode(text):
+    modtext = []
+    text = re.sub(r'\W+', ' ', text) # remove unknown chars
+    splittext = text.split()
+    c = 0
+    while c < wordsinpage: # with limit to 320 words
+        try:
+            currentword = splittext[c]
+            if currentword.isdigit():
+                numberword = numToWords(int(currentword))
+                for i in numberword.split():
+                    modtext.append(i)
+                    c += 1
+            elif currentword in vocabwords:
+                modtext.append(text.split()[c])
+            c += 1
+        except IndexError:
+            break
+    strlen = len(modtext)
     page = 0
     idx = 0
-    for word in text:
+    if strlen == 0:
+        return '', -1
+    for word in modtext:
         try:
             power = (strlen - (idx + 1))
-            page += words.index(word) * (base ** power)
+            page += vocabwords[word] * (wordsinpage ** power)
             idx += 1
         except ValueError:
-            print('Error in the vocab')
+            print('Error in the vocab. Possibly missing word')
             pass
-    return ' '.join(text), page
+    return ' '.join(modtext), page
 
+def base62_encode(decimal):
+    if (decimal == 0):
+        return base62[0]
+    arr = []
+    base = len(base62)
+    while decimal:
+        rem = decimal % base
+        decimal = decimal // base
+        arr.append(base62[rem])
+    arr.reverse()
+    return ''.join(arr)
+
+def base62_decode(base62number):
+    base = len(base62)
+    strlen = len(base62number)
+    decimal = 0
+    idx = 0
+    for word in base62number:
+        power = (strlen - (idx + 1))
+        decimal += base62.index(word) * (base ** power)
+        idx += 1
+    return decimal
+    
 # Transforms integers to words
 def numToWords(num,join=True):
     '''words = {} convert an integer number into words'''
@@ -125,7 +143,7 @@ def genfullpage(textofpage, words=vocabwords):
         fullpage.insert(0,words[random.randrange(0,nofwords-1)])
     for i in range(end,wordsinpage):
         fullpage.append(words[random.randrange(0,nofwords-1)])
-    location = base_encode(base_decode(' '.join(fullpage))[1],base62)
+    location = base62_encode(base_decode(' '.join(fullpage))[1])
     return start, end, fullpage, location
 
 ## Deprecated
@@ -173,21 +191,27 @@ if args.looktext:
     if not args.stringonly and len(text.split()) < 320:
         s,s,text,location = genfullpage(text)
         print('"',' '.join(text),'"',sep='')
-        print(location.replace(' ',''))
+        print(location)
     else:
-        print('"',text,'"',sep='')
-        print(base_encode(page,base62).replace(' ',''))
+        if page == -1:
+            print('ERROR: All words missing from vocabulary')
+        else:
+            print('"',text,'"',sep='')
+            print(base62_encode(page))
 
 # Location string -> Text
 if args.lookpage:    
-    location,page = base_decode(args.lookpage,base62,False)
+    page = base62_decode(args.lookpage)
     text = base_encode(page)
     if not args.stringonly and len(text.split()) < 320:
         s,s,text,location = genfullpage(text)
         print('"',' '.join(text),'"',sep='')
-        print(location.replace(' ',''))
+        print(location)
     else:
-        print('"',base_encode(page),'"',sep='')
-        print(location.replace(' ',''))
+        if page == -1:
+            print('ERROR: All words missing from vocabulary')
+        else:
+            print('"',base_encode(page),'"',sep='')
+            print(args.lookpage)
 
 
