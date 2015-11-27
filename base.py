@@ -198,6 +198,7 @@ if args.looktext:
         else:
             print('"',text,'"',sep='')
             print(base62_encode(page))
+            print(page)
 
 # Location string -> Text
 if args.lookpage:    
@@ -213,5 +214,6 @@ if args.lookpage:
         else:
             print('"',base_encode(page),'"',sep='')
             print(args.lookpage)
+            print(page)
 
 
