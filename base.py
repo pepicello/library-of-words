@@ -71,6 +71,7 @@ def base_decode(text):
         try:
             power = (strlen - (idx + 1))
             page += vocabwords[word] * (wordsinpage ** power)
+            print(vocabwords[word],page,word)
             idx += 1
         except ValueError:
             print('Error in the vocab. Possibly missing word')
@@ -198,7 +199,6 @@ if args.looktext:
         else:
             print('"',text,'"',sep='')
             print(base62_encode(page))
-            print(page)
 
 # Location string -> Text
 if args.lookpage:    
@@ -214,6 +214,4 @@ if args.lookpage:
         else:
             print('"',base_encode(page),'"',sep='')
             print(args.lookpage)
-            print(page)
-
 
