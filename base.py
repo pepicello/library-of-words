@@ -29,22 +29,8 @@ with open("vocab.txt") as word_file:
         nofwords += 1
 inversevocab = {v: k for k, v in vocabwords.items()}
 
-# Generalized-base encoder -> gives words from page number
-# Also used for base62 encoding
-def base_encode(page):
-    if (page == 0):
-        return 'a'
-    arr = []
-    while page:
-        rem = page % nofwords
-        page = page // nofwords
-        arr.append(inversevocab[rem])
-    arr.reverse()
-    return ' '.join(arr)
-
-# Generalized-base decoder -> gives page number from text (if word not in vocab, ignore)
-# Also used for base62 decoding
-def base_decode(text):
+# Clean text input
+def text_cleaner(text):
     modtext = []
     text = re.sub(r'\W+', ' ', text) # remove unknown chars
     splittext = text.split()
@@ -62,6 +48,25 @@ def base_decode(text):
             c += 1
         except IndexError:
             break
+    return modtext
+
+# Generalized-base encoder -> gives words from page number
+# Also used for base62 encoding
+def base_encode(page):
+    if (page == 0):
+        return 'a'
+    arr = []
+    while page:
+        rem = page % nofwords
+        page = page // nofwords
+        arr.append(inversevocab[rem])
+    arr.reverse()
+    return ' '.join(arr)
+
+# Generalized-base decoder -> gives page number from text (if word not in vocab, ignore)
+# Also used for base62 decoding
+def base_decode(text):
+    modtext = text_cleaner(text)
     strlen = len(modtext)
     page = 0
     idx = 0
@@ -134,8 +139,8 @@ def numToWords(num,join=True):
     return words
 
 # Creates random page for the searched string
-def genfullpage(textofpage):
-    fullpage = textofpage.split()
+def genfullpage(text):
+    fullpage = text_cleaner(text)
     wordsinstring = len(fullpage)
     start=random.randrange(0,wordsinpage-wordsinstring)
     end=wordsinstring+start
@@ -153,7 +158,7 @@ def genfullpage(textofpage):
 if args.looktext:
     text = args.looktext
     text,page = base_decode(''.join(text))
-    if not args.stringonly and len(text.split()) < 320:
+    if not args.stringonly:
         s,s,text,location = genfullpage(text)
         print('"',' '.join(text),'"',sep='')
         print(location)
@@ -168,7 +173,7 @@ if args.looktext:
 if args.lookpage:    
     page = base62_decode(args.lookpage)
     text = base_encode(page)
-    if not args.stringonly and len(text.split()) < 320:
+    if not args.stringonly:
         s,s,text,location = genfullpage(text)
         print('"',' '.join(text),'"',sep='')
         print(location)
