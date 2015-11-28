@@ -36,8 +36,8 @@ def base_encode(page):
         return 'a'
     arr = []
     while page:
-        rem = page % wordsinpage
-        page = page // wordsinpage
+        rem = page % nofwords
+        page = page // nofwords
         arr.append(inversevocab[rem])
     arr.reverse()
     return ' '.join(arr)
@@ -70,8 +70,7 @@ def base_decode(text):
     for word in modtext:
         try:
             power = (strlen - (idx + 1))
-            page += vocabwords[word] * (wordsinpage ** power)
-            print(vocabwords[word],page,word)
+            page += vocabwords[word] * (nofwords ** power)
             idx += 1
         except ValueError:
             print('Error in the vocab. Possibly missing word')
