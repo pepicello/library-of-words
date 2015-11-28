@@ -142,7 +142,10 @@ def numToWords(num,join=True):
 def genfullpage(text):
     fullpage = text_cleaner(text)
     wordsinstring = len(fullpage)
-    start=random.randrange(0,wordsinpage-wordsinstring)
+    if wordsinpage == wordsinstring:
+        start=0
+    else:
+        start=random.randrange(0,wordsinpage-wordsinstring)
     end=wordsinstring+start
     for i in range(0,start): 
         fullpage.insert(0,inversevocab[random.randrange(0,nofwords-1)])
