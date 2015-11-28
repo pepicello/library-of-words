@@ -34,18 +34,19 @@ def text_cleaner(text):
     modtext = []
     text = re.sub(r'\W+', ' ', text) # remove unknown chars
     splittext = text.split()
-    c = 0
+    c,iteratord = 0,0
     while c < wordsinpage: # with limit to 320 words
         try:
-            currentword = splittext[c]
+            currentword = splittext[iteratord]
             if currentword.isdigit():
                 numberword = numToWords(int(currentword))
                 for i in numberword.split():
                     modtext.append(i)
                     c += 1
             elif currentword in vocabwords:
-                modtext.append(text.split()[c])
+                modtext.append(currentword)
             c += 1
+            iteratord += 1    
         except IndexError:
             break
     return modtext
