@@ -134,54 +134,19 @@ def numToWords(num,join=True):
     return words
 
 # Creates random page for the searched string
-def genfullpage(textofpage, words=vocabwords):
+def genfullpage(textofpage):
     fullpage = textofpage.split()
-    wordsinstring = len(textofpage.split())
+    wordsinstring = len(fullpage)
     start=random.randrange(0,wordsinpage-wordsinstring)
     end=wordsinstring+start
     for i in range(0,start): 
-        fullpage.insert(0,words[random.randrange(0,nofwords-1)])
+        fullpage.insert(0,inversevocab[random.randrange(0,nofwords-1)])
     for i in range(end,wordsinpage):
-        fullpage.append(words[random.randrange(0,nofwords-1)])
+        fullpage.append(inversevocab[random.randrange(0,nofwords-1)])
     location = base62_encode(base_decode(' '.join(fullpage))[1])
     return start, end, fullpage, location
 
-## Deprecated
-## forward LCG
-## https://en.wikipedia.org/wiki/Linear_congruential_generator
-## m,a,c satisfy Hull-Dobell theorem to ensure no repetitions
-#def nextv(seed):
-#    m = nofwords**wordsinpage
-#    a = nofwords**(wordsinpage-20+1)
-#    c = 136481**(wordsinpage-20)
-#    randomized = ( a * seed + c ) % m
-#    return randomized
 
-## Deprecated
-## reverse LCG implementing Euclid's algo
-#def prevv(seed):
-#    m = nofwords**wordsinpage
-#    a = nofwords**(wordsinpage-20+1)
-#    c = 136481**(wordsinpage-20)
-#    qarray = [0,0,0,0,0,0,0,0,0,0,0,0]
-#    qarray[0] = 0
-#    qarray[1] = 1
-#    i = 2
-#    reset = m
-#    while m % a > 0:
-#        remainder = m % a
-#        quotient = m / a
-#        #print m,a
-#        qarray[i] = qarray[i-2]-(qarray[i-1] * quotient)
-#        m = a
-#        a = remainder
-#        i += 1
-#
-#    if qarray[i-1] < 0:
-#        qarray[i-1]+=reset
-#
-#    randomized = ( (seed - c) * qarray[i-1] ) % m
-#    return randomized
 
     
 # Text -> Location string
